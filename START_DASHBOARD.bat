@@ -14,10 +14,8 @@ echo.
 where node >nul 2>nul
 if errorlevel 1 goto NoNode
 
-:: 2. Set directory to project folder
-set "PROJECT_DIR=%~dp0truemeasure-dashboard"
-if not exist "%PROJECT_DIR%\" set "PROJECT_DIR=%~dp0"
-cd /d "%PROJECT_DIR%"
+:: 2. Set directory to current folder
+cd /d "%~dp0"
 
 :: 3. Check if server is already running on port 5173
 echo [1/3] Checking server status...

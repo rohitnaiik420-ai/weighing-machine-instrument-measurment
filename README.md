@@ -72,11 +72,52 @@ The data layer is decoupled in `src/data/services.js`:
 
 ---
 
-## 🛠️ Tech Stack
+---
 
-- **Framework**: React 18
-- **Bundler & Dev Server**: Vite 5
-- **Styling**: Tailwind CSS (Gov / DigiLocker-inspired Navy `#1e3a5f`, Brand Blue `#2563eb`, and high-contrast status colors)
-- **Charts**: Recharts
-- **QR Codes**: `qrcode.react` (SVG)
-- **Icons**: Lucide React
+## ⚡ Backend Architecture (FastAPI + PostgreSQL / SQLite)
+
+> **Team Alpha Coders | Smart India Hackathon 2026**
+
+The backend is built in **Python 3.13** using **FastAPI**, **SQLAlchemy 2.0 ORM**, and **PyJWT + RBAC**:
+
+### 🛠️ Backend Tech Stack
+- **Framework**: FastAPI (high-performance async REST API)
+- **Server**: Uvicorn ASGI
+- **ORM & Database**: SQLAlchemy 2.0 — Dual compatible:
+  - **Default**: Zero-config SQLite (`truemeasure.db`) for immediate offline/local run
+  - **PostgreSQL**: Set `DATABASE_URL=postgresql://user:password@localhost:5432/truemeasure` in `.env`
+- **Security**: JWT Bearer authentication + RBAC decorators (`applicant`, `officer`, `admin`)
+- **Document & File Storage**: Multi-part document upload handling with static serving (`/static/documents`)
+- **Audit Logs**: Immutable database audit log tracking every user action and lifecycle event
+- **Public QR Validation**: Public endpoint verifying digital certificates for on-site machines
+
+### 📡 Core REST Endpoints
+| Method | Endpoint | Description | Auth / RBAC |
+|---|---|---|---|
+| `POST` | `/api/auth/register` | Register new user account | Public |
+| `POST` | `/api/auth/login` | Authenticate & get JWT token | Public |
+| `GET` | `/api/auth/me` | Current authenticated profile | Bearer Token |
+| `GET` | `/api/instruments` | List instruments (filtered by role/owner) | Authenticated |
+| `POST` | `/api/instruments` | Register new weighing machine | Applicant / Admin |
+| `GET` | `/api/applications` | Applications queue & tracking | Authenticated |
+| `POST` | `/api/applications` | Submit verification application | Applicant |
+| `PUT` | `/api/applications/{id}/assign` | Assign inspector & schedule date | Officer / Admin |
+| `POST` | `/api/applications/{id}/verification`| Record on-site GPS & checklist | Officer |
+| `POST` | `/api/applications/{id}/decision`| Verification decision (certify/reject) | Officer / Admin |
+| `GET` | `/api/certificates` | List issued digital certificates | Authenticated |
+| `GET` | `/api/certificates/verify-qr/{code}` | Public QR code authenticity check | **Public** |
+| `POST` | `/api/documents/upload` | Upload invoices, specs & photos | Authenticated |
+| `GET` | `/api/audit-logs` | Query system audit trail | Officer / Admin |
+| `GET` | `/api/analytics/kpis` | Summary KPIs for executive dashboard | Authenticated |
+| `GET` | `/api/analytics/charts` | Visual data for Recharts widgets | Authenticated |
+
+---
+
+## 🚀 One-Click Launchers
+
+You can launch components individually or run the complete full-stack platform:
+- **`START_FULLSTACK.bat`**: Launches both FastAPI Backend (Port 8000) and React Frontend (Port 5173) together.
+- **`START_BACKEND.bat`**: Launches only the FastAPI backend server on `http://localhost:8000`.
+- **`START_DASHBOARD.bat`**: Launches only the React frontend on `http://localhost:5173`.
+- **Interactive Swagger Docs**: Open `http://localhost:8000/docs` while the backend is running.
+

@@ -18,7 +18,7 @@ if errorlevel 1 goto NoNode
 cd /d "%~dp0"
 
 :: 3. Check if server is already running on port 5173
-echo [1/3] Checking server status...
+echo [1/3] Checking server status....
 powershell -NoProfile -Command "if ((Invoke-WebRequest -Uri 'http://localhost:5173' -UseBasicParsing -ErrorAction SilentlyContinue).StatusCode -eq 200) { exit 0 } else { exit 1 }" >nul 2>nul
 if errorlevel 1 goto StartServer
 

@@ -29,8 +29,9 @@ def test_imports():
 
 def main():
     parser = argparse.ArgumentParser(description="TRUEMEASURE FastAPI Server Runner")
+    default_port = int(os.environ.get("PORT", 8000))
     parser.add_argument("--host", default="0.0.0.0", help="Host address (default: 0.0.0.0)")
-    parser.add_argument("--port", type=int, default=8000, help="Port number (default: 8000)")
+    parser.add_argument("--port", type=int, default=default_port, help=f"Port number (default: {default_port})")
     parser.add_argument("--reload", action="store_true", default=False, help="Enable auto-reload on code change")
     parser.add_argument("--test-only", action="store_true", help="Test imports and database without running server")
     args = parser.parse_args()

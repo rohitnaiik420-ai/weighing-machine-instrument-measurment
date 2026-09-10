@@ -2,7 +2,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from backend.app.config import settings
+from backend.app.config import settings, BASE_DIR
 from backend.app.database import engine, Base, SessionLocal
 from backend.app.seed_data import seed_database
 from backend.app.routers import (
@@ -64,19 +64,26 @@ app.include_router(analytics_router, prefix=settings.API_V1_STR)
 # Mount Document Uploads as Static Directory for fast file downloads
 app.mount("/static/documents", StaticFiles(directory=str(settings.UPLOAD_DIR)), name="documents")
 
-@app.get("/", tags=["System"])
-def root_status():
-    """Welcome and quick API status endpoint."""
-    return {
-        "project": "TRUEMEASURE",
-        "description": "Weighing & Measuring Instrument Digital Verification API",
-        "status": "online",
-        "version": settings.VERSION,
-        "docs_url": "/docs",
-        "redoc_url": "/redoc"
-    }
-
 @app.get("/api/health", tags=["System"])
 def health_check():
     """Service health check endpoint."""
-    return {"status": "healthy", "service": "truemeasure-backend"}
+    return {"status": "healthy", "service": "truemeasure-backend", "frontend": "integrated"}
+
+# Mount Built Vite Frontend (dist) for Unified Full-Stack Production Deployment
+dist_path = BASE_DIR.parent / "dist"
+if dist_path.exists():
+    app.mount("/assets", StaticFiles(directory=str(dist_path / "assets")), name="assets")
+
+    from fastapi.responses import FileResponse
+    from fastapi import HTTPException
+
+    @app.get("/{full_path:path}", include_in_schema=False)
+    async def serve_spa(full_path: str):
+        if full_path.startswith("api/") or full_path.startswith("docs") or full_path.startswith("redoc") or full_path.startswith("openapi.json") or full_path.startswith("static/"):
+            raise HTTPException(status_code=404, detail="API route not found")
+        target_file = dist_path / full_path
+        if target_file.exists() and target_file.is_file():
+            return FileResponse(target_file)
+        return FileResponse(dist_path / "index.html")
+
+
